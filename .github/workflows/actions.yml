@@ -36,7 +36,11 @@ jobs:
           pip install pipreqs
           pipreqs ./
           pip install -r requirements.txt
-          python3 test.py
+          for file in *.py; do
+              if [ -f "$file" ]; then
+                  python "$file"
+              fi
+          done
           tar -cf output.tar output
       - uses: actions/upload-artifact@v3
         with:

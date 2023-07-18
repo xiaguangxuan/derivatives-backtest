@@ -3,7 +3,6 @@
 import sys,os
 import numpy as np
 import pandas as pd
-import pickle as pkl
 import matplotlib.pyplot as plt
 print("Python Info: ",sys.version,sys.path)
 print("Current working directory: ",os.getcwd())
