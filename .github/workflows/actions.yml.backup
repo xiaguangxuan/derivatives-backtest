@@ -1,0 +1,185 @@
+# This is a basic workflow to help you get started with Actions
+name: Actions
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  what-to-run:
+    runs-on: ubuntu-22.04
+    outputs:
+      make-mac: ${{ steps.check-main-push-or-trigger.outputs.is-main-push == '1' || steps.check-main-push-or-trigger.outputs.manual-trigger == '1' || steps.check-diffs.outputs.mac-changed == '1' }}
+      make-win: ${{ steps.check-main-push-or-trigger.outputs.is-main-push == '1' }}
+      make-ubuntu:  ${{ steps.check-main-push-or-trigger.outputs.is-main-push == '1' }}
+    steps:
+      - name: Check Push to Main Branch
+        id: check-main-push-or-trigger
+        run: |
+          set -x
+          if [ "$GITHUB_EVENT_NAME" = 'push' ] && [ "$GITHUB_REF_NAME" = 'main' ]; then
+            echo is-main-push=1 >> "$GITHUB_OUTPUT"
+          else
+            echo is-main-push=0 >> "$GITHUB_OUTPUT"
+          fi
+          echo $GITHUB_EVENT_NAME
+          if [ "$GITHUB_EVENT_NAME" = 'workflow_dispatch' ]; then
+            echo manual-trigger=1 >> "$GITHUB_OUTPUT"
+          else
+            echo manual-trigger=0 >> "$GITHUB_OUTPUT"
+          fi
+      - name: Get Source
+        id: get-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: src
+          # submodules: recursive
+      - name: Check for diffs
+        id: check-diffs
+        run: |
+          set +e
+          cd src
+          MERGE_BASE=`git merge-base origin/main HEAD`
+          function get_changes() { # name, paths...
+            local name="$1"
+            shift
+            git diff --exit-code "$MERGE_BASE" -- "$@"
+            echo "$name-changed=$?" >> "$GITHUB_OUTPUT"
+          }
+          get_changes mac      CMakeLists.txt cmake third-party macosx
+          cat "$GITHUB_OUTPUT"
+
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-22.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
+
+  macos:
+    runs-on: macos-11
+    needs: [ what-to-run ]
+    if: ${{  needs.what-to-run.outputs.make-mac == 'true'}}
+    steps:
+      # 查看当前系统的版本信息
+      - name: Show Configuration
+        run: |
+          echo '${{ toJSON(needs) }}'
+          echo '${{ toJSON(runner) }}'
+          sw_vers  
+      - name: Get Dependencies
+        run: |
+          brew update
+          brew install cmake neofetch
+      - name: Get Source
+        uses: actions/checkout@v3
+        with:
+          path: src
+          # submodules: recursive
+      - name: Do Something
+        run: |
+          neofetch
+          neofetch > test.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: output-${{ github.job }}
+          path: test.txt
+
+  windows:
+    needs: [ what-to-run ]
+    runs-on: windows-2022
+    if: ${{ needs.what-to-run.outputs.make-win == 'true' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64]
+    steps:
+      - name: Show Configuration
+        run: |
+          echo '${{ toJSON(needs) }}'
+          echo '${{ toJSON(runner) }}'
+      - name: Get Build Tools
+        run: |
+          $DepsPrefix = (Join-Path (Get-Item .).Root.Name "${{ matrix.arch }}-prefix")
+          "DEPS_PREFIX=${DepsPrefix}" | Out-File $Env:GITHUB_ENV -Append
+          (Join-Path $DepsPrefix bin) | Out-File $Env:GITHUB_PATH -Append
+      - name: Get Source
+        uses: actions/checkout@v3
+        with:
+          path: src
+      - name: Do Something
+        run: |
+          tree ./ > tree.txt
+      - uses: actions/upload-artifact@v3
+        with:
+          name: tree
+          path: tree.txt
+
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    needs: [ what-to-run ]
+    if: ${{ needs.what-to-run.outputs.make-ubuntu == 'true' }}
+    steps:
+      - name: Show Configuration
+        run: |
+          echo '${{ toJSON(needs) }}'
+          echo '${{ toJSON(runner) }}'
+          cat /etc/os-release
+      # - name: Get Source
+      #   uses: actions/checkout@v3
+      - name: Get Source
+        id: get-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: src
+          # submodules: recursive
+      - name: Do Something
+        run: |
+          ip addr > ip.txt
+          pip install numpy pandas matplotlib
+          python3 src/test.py
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ipaddr
+          path: ip.txt
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

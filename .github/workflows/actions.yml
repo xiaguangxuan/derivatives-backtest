@@ -1,0 +1,65 @@
+# This is a basic workflow to help you get started with Actions
+name: Actions
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    # branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Show Configuration
+        run: |
+          cat /etc/os-release
+      # - name: Get Source
+      #   uses: actions/checkout@v3
+      - name: Get Source
+        id: get-source
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          path: src
+          # submodules: recursive
+      - name: Do Something
+        run: |
+          git clone https://github.com/tracyone/program_font 
+          cd program_font 
+          ./install.sh
+          cd ../src
+          pip install pipreqs
+          pipreqs ./
+          pip install -r requirements.txt
+          python3 test.py
+          tar -cf output.tar output
+      - uses: actions/upload-artifact@v3
+        with:
+          name: outputfiles
+          path: src/output.tar
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
