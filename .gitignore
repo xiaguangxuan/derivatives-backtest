@@ -14,8 +14,8 @@
 *.DS_Store
 
 
-# output/*
-# !output/*.md
+output/*
+!output/output_folder.md
 
 requirements.txt
 
