@@ -25,6 +25,7 @@ from tqdm import tqdm
 from matplotlib import rcParams
 import sys
 sys.path.append('.')
+sys.path.append('./imports')
 import SBplot
 rcParams['font.sans-serif'] = ['SimHei']
 rcParams['axes.unicode_minus'] = False

@@ -3,9 +3,9 @@ import seaborn as sns
 import numpy as np
 
 def plot_01(info):
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False # 用来正常显示负号
-
+    plt.rcParams['savefig.dpi'] = 300
     plt.style.use('fivethirtyeight')
 
     fig = plt.figure(figsize=(8,6))
@@ -150,7 +150,7 @@ def delete_zero_occ(states_set, occurances_set):
 
 
 def plot_02(info):
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False # 用来正常显示负号
 
     plt.style.use('fivethirtyeight')
@@ -303,7 +303,7 @@ def print_03(info, df1):
 
 
 def plot_04(info, df2):
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False # 用来正常显示负号
     plt.style.use('fivethirtyeight')
 
@@ -357,7 +357,7 @@ def plot_04(info, df2):
 
 
 def plot_05(info):
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False # 用来正常显示负号
     plt.style.use('fivethirtyeight')
 
@@ -504,7 +504,7 @@ def plot_05(info):
 
 
 def plot_06(info, df1_raw, df2_raw):
-    plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
+    plt.rcParams['font.sans-serif'] = ['SimHei']
     plt.rcParams['axes.unicode_minus'] = False # 用来正常显示负号
     plt.style.use('fivethirtyeight')
 
