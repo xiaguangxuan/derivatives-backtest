@@ -618,12 +618,13 @@ df_raw = df[:]
 for auxiliary_indicator in auxiliary_indicators:
     df = df[mask[auxiliary_indicator]]
 
-writer = pd.ExcelWriter('./output/snowball-{}-{}-{}-{}-{}-{}.xlsx'.format(
+# writer = pd.ExcelWriter('./output/snowball-{}-{}-{}-{}-{}-{}.xlsx'.format(
+#         underlying,begin_Ko_bc,Ki_bc,Option_expire_month,Ko_forward_month,step_ratio))
+
+# df_raw.to_excel(writer, sheet_name='全数据', index=False)
+df_raw.to_csv('output/snowball-{}-{}-{}-{}-{}-{}.csv'.format(
         underlying,begin_Ko_bc,Ki_bc,Option_expire_month,Ko_forward_month,step_ratio))
-
-df_raw.to_excel(writer, sheet_name='全数据', index=False)
-
-writer.save()
+#writer.to_()
 
 
 # In[14]:
