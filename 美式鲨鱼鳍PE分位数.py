@@ -21,7 +21,7 @@ from  matplotlib.ticker import PercentFormatter
 warnings.filterwarnings('ignore')
 import sys
 # 加载当前路径
-sys.path.append('.')
+sys.path.append('./imports')
 from simple_tools import filter_operator, get_data
 
 ####################### 分界线 ###############################3
