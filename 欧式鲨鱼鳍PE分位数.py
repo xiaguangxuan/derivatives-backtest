@@ -13,7 +13,9 @@ import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib import ticker
+
+from  matplotlib.ticker import PercentFormatter
+
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 mpl.rcParams['axes.unicode_minus']=False
 import warnings
@@ -25,9 +27,10 @@ from simple_tools import filter_operator, get_data
 
 
 ####### 保本鲨鱼型收益凭证：欧式鲨鱼鳍 ########
-def oushishayuqi(data, knock_out = 0.1,
-                 knock_out_rate = 0.035,
-                 basic_rate = 0.005,
+
+def oushishayuqi(data, knock_out = 0.17,
+                 knock_out_rate = 0.016,
+                 basic_rate = 0.00,
                  participation_rate = 1):# data 为最后一天的收益率
     flag = 0
     # 这里的收益率还可以单独设计
@@ -40,17 +43,22 @@ def oushishayuqi(data, knock_out = 0.1,
 
 ########## 参数初始化 ###########
 # 回测开始时间与结束时间
-start_date = '2018-01-01'
-end_date = '2023-07-17'
+
+# start_date = '2017-10-17'
+start_date = '2017-01-01'
+end_date = '2023-07-21'
+
 # 标的的存续期
 month_period = 12
 ############## 导入数据与数据切片 ################
 data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
-# data, data_resample, data_copy = get_data(useapi = 1, underlying = '000852.SH')
+
+# data, data_resample, data_copy = get_data(useapi = 1, underlying = '000905.SH', start = '2004-01-01')
 data = data[start_date:end_date]
 
 ############ 分位数模块 ############
-data = filter_operator(data, data_copy, lower_bound = 0.1, upper_bound = 0.5, rolling_window_width = 3)
+data = filter_operator(data, data_copy, lower_bound = 0.35, upper_bound = 0.48, rolling_window_width = 3)
+
 
 ######################################
 # 买入时间平移 month_period 个月份
@@ -63,15 +71,20 @@ df.columns = ['买入净值', '到期日', '到期净值']
 df['收益率'] = df['到期净值']/df['买入净值'] - 1
 ######### 更改 apply 中计算收益的函数即可计算不同形态欧式的收益率 ############
 df[['凭证收益率', '是否敲出']] = df['收益率'].apply(oushishayuqi)
-df.to_csv('output/欧式鲨鱼鳍.csv')
+
+
 ############## 绘图模块 #######################
 
-# sns.histplot(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)])
+# print(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], [0, 0.1, 0.2])).size())
+# print(np.round(100 * df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], [0, 0.1, 0.2])).size()/len(df[(df['是否敲出'] == 0)&(df['收益率'] > 0)]), 2))
 
-# print(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], np.arange(0.005, 0.12, 0.02))).size())
-# print(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], np.arange(0.005, 0.12, 0.02))).size()/len(df[(df['是否敲出'] == 0)&(df['收益率'] > 0)]))
+print(len(df), len(df[df['收益率']<0]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[df['是否敲出'] == 1]))
+print(round(len(df[df['收益率']<0])/len(df) * 100, 2), round(len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df) * 100, 2), round(len(df[df['是否敲出'] == 1])/len(df) * 100, 2))
+print(df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].min() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].max() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].median() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].mean() * 100)
 
-# sns.histplot(df['收益率'])
-
-# print(len(df[df['收益率']<0]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[df['是否敲出'] == 1]))
-# print(len(df), len(df[df['收益率']<0])/len(df), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df), len(df[df['是否敲出'] == 1])/len(df))
+############# 绘制收益率的代码 ################
+g = sns.histplot(df['凭证收益率'], binwidth = 0.01, stat = 'probability')
+g.xaxis.set_major_formatter(PercentFormatter(1))
+g.set_xlabel('收益率')
+g.set_ylabel('概率')
+g.grid()
