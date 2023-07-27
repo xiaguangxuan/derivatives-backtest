@@ -21,7 +21,7 @@ from  matplotlib.ticker import PercentFormatter
 warnings.filterwarnings('ignore')
 import sys
 # 加载当前路径
-sys.path.append('.')
+sys.path.append('.\imports')
 from simple_tools import filter_operator, get_data
 
 ####################### 分界线 ###############################3
@@ -46,8 +46,8 @@ end_date = '2023-07-21'
 # 标的的存续期
 month_period = 12
 ############## 导入数据与数据切片 ################
-# data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
-data, data_resample, data_copy = get_data(useapi = 1, underlying = '000016.SH', start = '2004-01-01')
+data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
+# data, data_resample, data_copy = get_data(useapi = 1, underlying = '000016.SH', start = '2004-01-01')
 
 data = data[start_date:end_date]
 

@@ -20,7 +20,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import sys
 # 加载当前路径
-sys.path.append('.')
+sys.path.append('.\imports')
 from simple_tools import filter_operator, get_data
 
 
@@ -46,8 +46,8 @@ end_date = '2023-07-21'
 # 标的的存续期
 month_period = 12
 ############## 导入数据与数据切片 ################
-# data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
-data, data_resample, data_copy = get_data(useapi = 1, underlying = '000905.SH', start = '2004-01-01')
+data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
+# data, data_resample, data_copy = get_data(useapi = 1, underlying = '000905.SH', start = '2004-01-01')
 data = data[start_date:end_date]
 
 ############ 分位数模块 ############
@@ -72,7 +72,6 @@ df[['凭证收益率', '是否敲出']] = df['收益率'].apply(oushishayuqi)
 
 print(len(df), len(df[df['收益率']<0]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[df['是否敲出'] == 1]))
 print(round(len(df[df['收益率']<0])/len(df) * 100, 2), round(len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df) * 100, 2), round(len(df[df['是否敲出'] == 1])/len(df) * 100, 2))
-
 print(df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].min() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].max() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].median() * 100, df['收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].mean() * 100)
 
 ############# 绘制收益率的代码 ################

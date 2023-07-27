@@ -45,8 +45,8 @@ def get_data(useapi = 0, underlying = '中证500PETTM.xlsx',
     else:
         # 读取本地数据，数据文件与运行程序放置在同一个文件夹
         # 数据文件第一列为日期，第二列为标的收盘价，第三列为用于筛选的指标
-        data = pd.read_excel(underlying, index_col=(0), usecols = range(0, 2))
-        data_copy = pd.read_excel(underlying, index_col=(0), usecols = [0, 2])
+        data = pd.read_excel('input/' + underlying, index_col=(0), usecols = range(0, 2))
+        data_copy = pd.read_excel('input/' + underlying, index_col=(0), usecols = [0, 2])
         data_copy.columns = ['筛选指标']
     
     # 调整数据频率，将交易日改为自然日，同时缺失值向后补全
