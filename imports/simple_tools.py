@@ -71,7 +71,9 @@ def filter_operator(data, data_copy, is_quantile = 1, lower_bound = 0, upper_bou
     
     # 历史分位数
     history_quantile_index = []
+
     # 使用分位数进行筛选还是绝对数值进行筛选
+
     if is_quantile:
         # 是滚动窗口
         if is_rolling_window:
@@ -82,20 +84,24 @@ def filter_operator(data, data_copy, is_quantile = 1, lower_bound = 0, upper_bou
                 # 这一时刻的历史分位数介于 lower 和 upper bound 之间
                 if (history_quantile <= upper_bound) & (history_quantile >= lower_bound):
                     history_quantile_index.append(t)
+
         # 是扩展窗口
         else:
             # 遍历每一个时刻
             for t in data.index:
                 # 获得这一时刻的历史分位数（扩展窗口）
+
                 history_quantile = data_copy[fixed_window_beginning:t]['筛选指标'].rank(pct = True)[-1]
                 # 这一时刻的历史分位数介于 lower 和 upper bound 之间
                 if (history_quantile <= upper_bound) & (history_quantile >= lower_bound):
                     history_quantile_index.append(t)
     else:
         for t in data.index:
+
             # 获得这一时刻筛选指标的绝对数值
             history_quantile = data_copy.loc[t]['筛选指标']
             # 这一时刻筛选指标的绝对数值介于 lower 和 upper bound 之间
+
             if (history_quantile <= upper_bound) & (history_quantile >= lower_bound):
                 history_quantile_index.append(t)
                 
@@ -105,6 +111,7 @@ def filter_operator(data, data_copy, is_quantile = 1, lower_bound = 0, upper_bou
 
 def knock_out_stage(df, data_resample, 
                     knock_out, month_period = 12, start_month = 1):
+
     # input:
     # df --> 一张记录在特定交易日开仓的表格, 主要要素: index 为开仓时间; '收盘价(元)_x' 为开仓时的 标的收盘价;
     #        '收盘价(元)_y' 为不考虑敲出条件，到期时的收盘价; '到期日' 为不考虑敲出条件的到期日
@@ -115,6 +122,7 @@ def knock_out_stage(df, data_resample,
 
     # output:
     # 在原始表格 df 的基础上, 考虑敲出条件, 对到期 or 敲出时的日期和收盘价进行了更新, 并增加记录了'是否敲出', '敲出月份' 两列参数
+
 
     # 记录是否敲出
     flag_out = pd.Series()
@@ -138,9 +146,11 @@ def knock_out_stage(df, data_resample,
                 break
             # 若观察日在数据的索引范围内，找到该观测值
             observation_price = data_resample.loc[observation_time].values
+
             # 若该观测值大于敲出价格
             if observation_price >= knock_out_price:
                 # 敲出记为 1，并记录下对应的发生月份，并把相应的参数填入表格 df 进行更新，弹出循环
+
                 flag_out[i] = 1
                 flag_out_time[i] = j
                 df['收盘价(元)_y'][i] = observation_price

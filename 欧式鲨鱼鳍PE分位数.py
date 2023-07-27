@@ -13,18 +13,21 @@ import os
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+
 from  matplotlib.ticker import PercentFormatter
+
 plt.rcParams["font.sans-serif"]=["SimHei"] #设置字体
 mpl.rcParams['axes.unicode_minus']=False
 import warnings
 warnings.filterwarnings('ignore')
 import sys
 # 加载当前路径
-sys.path.append('.\imports')
+sys.path.append('./imports')
 from simple_tools import filter_operator, get_data
 
 
 ####### 保本鲨鱼型收益凭证：欧式鲨鱼鳍 ########
+
 def oushishayuqi(data, knock_out = 0.17,
                  knock_out_rate = 0.016,
                  basic_rate = 0.00,
@@ -40,18 +43,22 @@ def oushishayuqi(data, knock_out = 0.17,
 
 ########## 参数初始化 ###########
 # 回测开始时间与结束时间
+
 # start_date = '2017-10-17'
 start_date = '2017-01-01'
 end_date = '2023-07-21'
+
 # 标的的存续期
 month_period = 12
 ############## 导入数据与数据切片 ################
 data, data_resample, data_copy = get_data(useapi = 0, underlying = '中证1000PETTM.xlsx')
+
 # data, data_resample, data_copy = get_data(useapi = 1, underlying = '000905.SH', start = '2004-01-01')
 data = data[start_date:end_date]
 
 ############ 分位数模块 ############
 data = filter_operator(data, data_copy, lower_bound = 0.35, upper_bound = 0.48, rolling_window_width = 3)
+
 
 ######################################
 # 买入时间平移 month_period 个月份
@@ -64,6 +71,7 @@ df.columns = ['买入净值', '到期日', '到期净值']
 df['收益率'] = df['到期净值']/df['买入净值'] - 1
 ######### 更改 apply 中计算收益的函数即可计算不同形态欧式的收益率 ############
 df[['凭证收益率', '是否敲出']] = df['收益率'].apply(oushishayuqi)
+
 
 ############## 绘图模块 #######################
 
