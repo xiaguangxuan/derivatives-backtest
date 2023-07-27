@@ -87,5 +87,5 @@ sns.displot(data = df[['是否敲出', '凭证收益率']], x='凭证收益率',
 
 sns.histplot(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)])
 
-print(len(df[df['是否敲出'] == 1]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[(df['收益率'] >= max_loss) & (df['收益率'] <= 0)]), len(df[df['收益率'] < max_loss]))
-print(len(df), len(df[df['是否敲出'] == 1])/len(df), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df), len(df[(df['收益率'] >= max_loss) & (df['收益率'] <= 0)])/len(df), len(df[df['收益率'] < max_loss])/len(df))
+print(len(df[df['是否敲出'] == 1]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[(df['收益率'] >= - max_loss) & (df['收益率'] <= 0)]), len(df[df['收益率'] < -max_loss]))
+print(len(df), len(df[df['是否敲出'] == 1])/len(df), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df), len(df[(df['收益率'] >= - max_loss) & (df['收益率'] <= 0)])/len(df), len(df[df['收益率'] < - max_loss])/len(df))
