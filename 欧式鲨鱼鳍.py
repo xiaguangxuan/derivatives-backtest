@@ -80,10 +80,25 @@ df[['凭证收益率', '是否敲出']] = df['收益率'].apply(oushishayuqi,
 # print(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], [0, 0.1, 0.2])).size())
 # print(np.round(100 * df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].groupby(by = pd.cut(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)], [0, 0.1, 0.2])).size()/len(df[(df['是否敲出'] == 0)&(df['收益率'] > 0)]), 2))
 
+fig, ax = plt.subplots(figsize = (8, 4))
+arr = np.array([[len(df[df['收益率']<0]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[df['是否敲出'] == 1])]])
+arr = np.concatenate([arr, np.round(arr/len(df), 2)])
+tab = plt.table(cellText = arr, 
+              colLabels = ['未敲出<0', '未敲出>0', '敲出'], 
+             rowLabels = ['样本数', '频率'],
+              loc='center', 
+              cellLoc='center',
+              rowLoc='center')
+tab.scale(1,2) 
+plt.axis('off')
+plt.show()
+
 print(len(df), len(df[df['收益率']<0]), len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)]), len(df[df['是否敲出'] == 1]))
 print(round(len(df[df['收益率']<0])/len(df) * 100, 2), round(len(df[(df['是否敲出'] == 0) & (df['收益率'] > 0)])/len(df) * 100, 2), round(len(df[df['是否敲出'] == 1])/len(df) * 100, 2))
 
 print(df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].min() * 100, df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].max() * 100, df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].median() * 100, df['凭证收益率'][(df['是否敲出'] == 0)&(df['收益率'] > 0)].mean() * 100)
+
+
 
 ############# 绘制收益率的代码 ################
 g = sns.histplot(df['凭证收益率'], binwidth = 0.0025, stat = 'probability')
