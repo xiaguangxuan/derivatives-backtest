@@ -11,6 +11,9 @@ import matplotlib.pyplot as plt
 mpl.rcParams['font.family'] = 'simhei' #用来正常显示中文标签
 mpl.rcParams['axes.unicode_minus']=False #用来正常显示负号
 
+
+
+
 sys.path.append('./imports')
 import hello as myhello
 myhello.hello()
