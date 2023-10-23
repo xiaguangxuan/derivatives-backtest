@@ -41,7 +41,7 @@ if __name__ == "__main__":
     underlying = "上证50"
     underlying_code = "000016.SH"
 
-    snowball_type = "降敲型雪球"
+    snowball_type = "限亏止盈型雪球" # 经典雪球/降敲型雪球/限亏型雪球/限亏止盈型雪球
 
     # 合约期限
     option_expire_month = 24                            # 只以月度来结算，一年则调整为12个月
@@ -123,4 +123,4 @@ if __name__ == "__main__":
     output = pd.concat(output, axis=1).T 
     output.columns = col_names
 
-    output.to_csv(output_path + "/output.csv")
+    output.to_csv(output_path + f"/{snowball.snowball_type}-output.csv")

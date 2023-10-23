@@ -21,4 +21,17 @@ def ensure_trading_day(current_date):
         return next_date
     
 
+def days_between_dates(date1, date2):
+    """
+    Args:
+        date1 (datetime): date1
+        date2 (datetime): date2
+    Returns:
+        int: number of days between date1 and date2
+    """
+    index1 = trading_datelist.index(date1)
+    index2 = trading_datelist.index(date2)
+    days_between = abs(index1 - index2) + 1
+    return days_between
+
 

@@ -174,35 +174,47 @@ class BaseSnowball(object):
 
     def case_no_event(self):
         self.status = "未敲入，未敲出"
+
         regular_coupon = self.coupon_param["regular_coupon"]
-        self.abs_return = (
-            regular_coupon * self.time_fixed_param["option_expire_month"] / 12
-        )
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.time_dynamic_param["end_date"]
+
+        self.abs_return = regular_coupon * days_between_dates(start_date, end_date) / 365
         self.annual_return = regular_coupon
         return None
 
     def case_knockout_only(self):
         self.status = "未敲入，敲出"
+
         kickout_coupon = self.coupon_param["kickout_coupon"]
-        self.abs_return = kickout_coupon * self.terminal_month / 12
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.knockout_date
+
+        self.abs_return = kickout_coupon * days_between_dates(start_date, end_date) / 365
         self.annual_return = kickout_coupon
         return None
 
     def case_knockin_only(self):
         self.status = "敲入，未敲出"
+
         start_price = self.start_price
         end_price = self.end_price
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.time_dynamic_param["end_date"]
+
         self.abs_return = max(end_price / start_price - 1, -1)
-        self.annual_return = (
-            self.abs_return * 12 / self.time_fixed_param["option_expire_month"]
-        )
+        self.annual_return = self.abs_return * 365 / days_between_dates(start_date, end_date)
         return None
 
     def case_knockin_and_knockout(self):
         """敲入且敲出"""
         self.status = "敲入，敲出"
+
         kickout_coupon = self.coupon_param["kickout_coupon"]
-        self.abs_return = kickout_coupon * self.terminal_month / 12
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.knockout_date
+
+        self.abs_return = kickout_coupon * days_between_dates(start_date, end_date) / 365
         self.annual_return = kickout_coupon
         return None
 
@@ -263,7 +275,7 @@ class StepdownSnowball(BaseSnowball):
         return None
 
     def determine_knockout(self, index_data_selected):
-        """每月敲出观察"""
+        """每月敲出观察，期间更新敲出条件"""
         for current_month in range(
             self.knockout_param["observation_start_month"],
             self.time_fixed_param["option_expire_month"] + 1,
@@ -302,12 +314,14 @@ class LimitedLossSnowball(BaseSnowball):
 
     def case_knockin_only(self):
         self.status = "敲入，未敲出"
+
         start_price = self.start_price
         end_price = self.end_price
-        self.abs_return = max(end_price / start_price - 1, -(1 - self.protect_ratio))
-        self.annual_return = (
-            self.abs_return * 12 / self.time_fixed_param["option_expire_month"]
-        )
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.time_dynamic_param["end_date"]
+
+        self.abs_return = max(end_price / start_price - 1, -1)
+        self.annual_return = self.abs_return * 365 / days_between_dates(start_date, end_date)
         return None
 
 
@@ -347,10 +361,14 @@ class LimitedLossAndProfitSnowball(BaseSnowball):
     
     def case_no_event(self):
         self.status = "未敲入，未敲出"
+
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.time_dynamic_param["end_date"]
+
         self.abs_return = (
             max(self.end_price / self.start_price - 1, -(1-self.protect_ratio))
         )
-        self.annual_return = self.abs_return * 12 / self.time_fixed_param["option_expire_month"]
+        self.annual_return = self.abs_return * 365 / days_between_dates(start_date, end_date)
         return None
 
 

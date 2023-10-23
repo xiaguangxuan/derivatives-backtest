@@ -29,14 +29,18 @@ def plot_bactest_info(Snowball, backtest_start, backtest_end, output_path):
         ['初始敲入水平', '%.1f%%'%(Snowball.coupon_param["regular_coupon"] * 100)],
         ['敲出水平', '%.1f%%'%(Snowball.knockout_param["knockout_barrier"] * 100)],
         ['敲入观察频率', '每日'],
-        ['固定收益率（年化）', '%.2f%%'%(Snowball.coupon_param["regular_coupon"] * 100)], 
-        ['红利票息（年化）', '%.2f%%'%(Snowball.coupon_param["kickout_coupon"] * 100)],
+        ['固定收益率（年化）', '%.2f%%'%(Snowball.coupon_param["kickout_coupon"] * 100)], 
+        ['红利票息（年化）', '%.2f%%'%(Snowball.coupon_param["regular_coupon"] * 100)],
         ['是否允许追保', boolean_dict[Snowball.profit_param["margin_call"]]]
         ]
 
     if Snowball.snowball_type == "降敲型雪球":
         snowball_info.insert(7, ['降敲水平', '%.1f%%'%(Snowball.stepdown_ratio * 100)])
-            
+    elif Snowball.snowball_type == "限亏型雪球":
+        snowball_info.insert(7, ['保护比例', '%.1f%%'%(Snowball.protect_ratio * 100)])    
+    elif Snowball.snowball_type == "限亏止盈型雪球":
+        snowball_info.insert(7, ['保护比例', '%.1f%%'%(Snowball.protect_ratio * 100)])    
+
     bg_color = []   
     for i in range(len(snowball_info)):
         bg_color.append(['w',sns.color_palette("Blues")[0]])
@@ -50,8 +54,7 @@ def plot_bactest_info(Snowball, backtest_start, backtest_end, output_path):
 
     ax.axis('off')
     ax.set_frame_on(False)
-    plt.savefig(output_path + "/backtest_info.png")
-    # plt.show()
+    plt.savefig(output_path + f"/{Snowball.snowball_type}-info.png")
     plt.close()
     return None
         
