@@ -6,17 +6,32 @@ Revised on Wed Oct 18 10:57:30 2023
 
 @author: liuguixu 
 Revised by: Fan Chen
-Revised by: Junyi Wang on restructuring code
+Revised by: Junyi Wang
 
 """
 
-"""多种雪球结构历史回测数据分析"""
+"""多种雪球结构类"""
 
 
 from dateutil.relativedelta import relativedelta
 from tools import *
 from getData import *
 
+
+class SnowballOption:
+    @staticmethod
+    def create_snowball(snowball_type, *args, **kwargs):
+        if snowball_type == "经典雪球":
+            return ClassicSnowball(*args, **kwargs)
+        elif snowball_type == "降敲型雪球":
+            return StepdownSnowball(*args, **kwargs)
+        elif snowball_type == "限亏型雪球":
+            return LimitedLossSnowball(*args, **kwargs)
+        elif snowball_type == "限亏止盈型雪球":
+            return LimitedLossAndProfitSnowball(*args, **kwargs)
+        else:
+            raise ValueError(f"Unknown snowball_type: {snowball_type}")
+        
 
 class BaseSnowball(object):
     def __init__(
@@ -29,24 +44,24 @@ class BaseSnowball(object):
         coupon_param,
         profit_param,
     ):
-        self.underlying = underlying  # 标的代码
-        self.snowball_type = snowball_type  # 雪球类型
-        self.time_fixed_param = time_fixed_param  # 敲入参数：包括敲入条件
-        self.knockin_param = knockin_param  # 敲入参数：包括敲入条件
+        self.underlying = underlying                # 标的代码
+        self.snowball_type = snowball_type          # 雪球类型
+        self.time_fixed_param = time_fixed_param    # 时间固定参数：包括敲入条件
+        self.knockin_param = knockin_param          # 敲入参数：包括敲入条件
         self.knockout_param = knockout_param  # 敲出参数：包括首个敲出观察日，敲出条件，敲出观察频率，每月下调比例
         self.coupon_param = coupon_param  # 票息参数：包括敲出票息与红利票息
         self.profit_param = profit_param  # 不可追保则最大损失1 (即全部保证金)
 
-        self.knockin_price = None  # 标的敲入价格
+        self.knockin_price = None   # 标的敲入价格
         self.knockout_price = None  # 标的敲出价格
-        self.knockin_date = None  # 标的敲入日期
-        self.knockout_date = None  # 标的敲出日期
+        self.knockin_date = None    # 标的敲入日期
+        self.knockout_date = None   # 标的敲出日期
         self.terminal_month = None  # 合约终止月份
-        self.status = None  # 合约状态
-        self.maturity_sign = True  # 到期指示(回测数据足够覆盖至到期，但是不意味着不提前敲出)
+        self.status = None          # 合约状态
+        self.maturity_sign = True   # 到期指示(回测数据足够覆盖至到期，但是不意味着不提前敲出)
 
     def set_time_param(self, time_dynamic_param):
-        self.time_dynamic_param = time_dynamic_param  # 日期参数：包括合约起始日期,合约长度与期权到期日
+        self.time_dynamic_param = time_dynamic_param  # 时间可变参数：包括合约起始日期,合约长度与合约到期日
 
     def reset_state(self):
         """重设状态"""
@@ -62,6 +77,7 @@ class BaseSnowball(object):
         index_data_selected = self.get_index_data_selected(
             index_data_all
         )  # 该雪球产品回测用到的数据
+        self.fetch_start_end_prices(index_data_selected)
         self.determine_knockin(index_data_selected)
         self.determine_knockout(index_data_selected)
         self.calculate_return()
@@ -78,13 +94,19 @@ class BaseSnowball(object):
         index_data_selected = index_data_all.loc[date_range]
         return index_data_selected
 
+    def fetch_start_end_prices(self, index_data_selected):
+        """获取对应起始/结束日期的标的价格"""
+        start_date = self.time_dynamic_param["start_date"]
+        end_date = self.time_dynamic_param["end_date"]
+        self.start_price = index_data_selected.loc[start_date, "close"]  # 起始日标的价格
+        self.end_price = index_data_selected.loc[end_date, "close"]  # 结束日标的价格
+        return None
+
     def determine_knockin(self, index_data_selected):
-        """判断在回测区间内是否敲入，每日敲入观察，时间区间为：合约起始日期之后的第二天 至 到期日"""
+        """每日敲入观察，时间区间为：合约起始日期之后的第二天至到期日"""
         start_date = self.time_dynamic_param["start_date"]
         end_date = self.time_dynamic_param["end_date"]
 
-        self.start_price = index_data_selected.loc[start_date, "close"]  # 起始日标的价格
-        self.end_price = index_data_selected.loc[end_date, "close"]  # 结束日标的价格
         observation_period = [
             i
             for i in list(index_data_selected.index)
@@ -187,7 +209,6 @@ class BaseSnowball(object):
 
 class ClassicSnowball(BaseSnowball):
     """经典雪球"""
-
     def __init__(
         self,
         underlying,
@@ -210,7 +231,6 @@ class ClassicSnowball(BaseSnowball):
 
 class StepdownSnowball(BaseSnowball):
     """降敲型雪球"""
-
     def __init__(
         self,
         underlying,
@@ -257,12 +277,86 @@ class StepdownSnowball(BaseSnowball):
         return None
 
 
-class SnowballOption:
-    @staticmethod
-    def create_snowball(snowball_type, *args, **kwargs):
-        if snowball_type == "经典雪球":
-            return ClassicSnowball(*args, **kwargs)
-        elif snowball_type == "降敲型雪球":
-            return StepdownSnowball(*args, **kwargs)
-        else:
-            raise ValueError(f"Unknown snowball_type: {snowball_type}")
+class LimitedLossSnowball(BaseSnowball):
+    """限亏型雪球"""
+    def __init__(
+        self,
+        underlying,
+        time_fixed_param,
+        knockin_param,
+        knockout_param,
+        coupon_param,
+        profit_param,
+    ):
+        """初始化"""
+        super().__init__(
+            "限亏型雪球",
+            underlying,
+            time_fixed_param,
+            knockin_param,
+            knockout_param,
+            coupon_param,
+            profit_param,
+        )
+        self.protect_ratio = float(input("请输入该限亏型雪球保护比例:"))  # e.g. 输入 0.8 即保护比例为 80%
+
+    def case_knockin_only(self):
+        self.status = "敲入，未敲出"
+        start_price = self.start_price
+        end_price = self.end_price
+        self.abs_return = max(end_price / start_price - 1, -(1 - self.protect_ratio))
+        self.annual_return = (
+            self.abs_return * 12 / self.time_fixed_param["option_expire_month"]
+        )
+        return None
+
+
+class LimitedLossAndProfitSnowball(BaseSnowball):
+    """限亏止盈型雪球"""
+    def __init__(
+        self,
+        underlying,
+        time_fixed_param,
+        knockin_param,
+        knockout_param,
+        coupon_param,
+        profit_param,
+    ):
+        """初始化"""
+        super().__init__(
+            "限亏止盈型雪球",
+            underlying,
+            time_fixed_param,
+            knockin_param,
+            knockout_param,
+            coupon_param,
+            profit_param,
+        )
+        self.protect_ratio = float(input("请输入该限亏止盈型雪球保护比例:"))  # e.g. 输入 0.8 即保护比例为 80%
+        self.coupon_param["regular_coupon"] = 0 # 红利票息为0
+
+    def process_backtest(self, index_data_all):
+        """无敲入环节"""
+        index_data_selected = self.get_index_data_selected(
+            index_data_all
+        )  # 该雪球产品回测用到的数据
+        self.fetch_start_end_prices(index_data_selected)
+        self.determine_knockout(index_data_selected)
+        self.calculate_return()
+        return None
+    
+    def case_no_event(self):
+        self.status = "未敲入，未敲出"
+        self.abs_return = (
+            max(self.end_price / self.start_price - 1, -(1-self.protect_ratio))
+        )
+        self.annual_return = self.abs_return * 12 / self.time_fixed_param["option_expire_month"]
+        return None
+
+
+    
+
+
+    
+
+

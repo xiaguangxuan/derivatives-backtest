@@ -22,4 +22,3 @@ def ensure_trading_day(current_date):
     
 
 
-
